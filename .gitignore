@@ -1,0 +1,98 @@
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# Environment variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Build outputs
+dist/
+build/
+*.exe
+*.out
+
+# Coverage
+coverage/
+.nyc_output
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Docker
+*.dockerignore
+docker-compose.override.yml
+
+# Prisma
+prisma/migrations/
+prisma/*.db
+prisma/*.db-journal
+
+# NestJS
+.nestcli.json
+.nestjs/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS
+Thumbs.db
+
+# Tests
+*.junit.xml
+test-results/
+
+# Package managers
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# Electron
+clients/desktop/dist/
+clients/desktop/release/
+
+# Mobile
+clients/mobile/android/
+clients/mobile/ios/
+clients/mobile/.expo/
+
+# Web
+clients/web/dist/
+
+# Temporary files
+tmp/
+temp/
+
+# SSL certificates
+*.pem
+*.key
+*.crt
+
+# Backup files
+*.bak
+
+# Microservices logs
+services/*/logs/

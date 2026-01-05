@@ -1,0 +1,29 @@
+{
+  "name": "hivehub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@fastify/rate-limit": "^10.3.0",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/serve-static": "^5.0.4",
+    "@nestjs/swagger": "^11.2.3",
+    "@nestjs/throttler": "^6.5.0",
+    "compression": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "helmet": "^8.1.0"
+  },
+  "devDependencies": {
+    "@types/express-rate-limit": "^6.0.2"
+  }
+}

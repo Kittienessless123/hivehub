@@ -1,0 +1,147 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum UserRole {
+  USER
+  FREELANCER
+  CLIENT
+  ADMIN
+  MODERATOR
+}
+
+enum UserStatus {
+  PENDING
+  ACTIVE
+  BLOCKED
+  SUSPENDED
+  DELETED
+}
+
+model User {
+  id                  String    @id @default(uuid())
+  email               String    @unique @db.VarChar(255)
+  passwordHash        String    @map("password_hash") @db.VarChar(255)
+  username            String?   @unique @db.VarChar(50)
+  
+  // Verification
+  isEmailVerified     Boolean   @map("is_email_verified") @default(false)
+  emailVerificationToken String? @map("email_verification_token") @db.VarChar(255)
+  emailVerificationSentAt DateTime? @map("email_verification_sent_at")
+  
+  // Password reset
+  passwordResetToken  String?   @map("password_reset_token") @db.VarChar(255)
+  passwordResetExpires DateTime? @map("password_reset_expires")
+  
+  // Security
+  twoFactorEnabled    Boolean   @map("two_factor_enabled") @default(false)
+  twoFactorSecret     String?   @map("two_factor_secret") @db.VarChar(255)
+  
+  // Profile
+  firstName           String?   @map("first_name") @db.VarChar(100)
+  lastName            String?   @map("last_name") @db.VarChar(100)
+  avatarUrl           String?   @map("avatar_url") @db.Text
+  phone               String?   @db.VarChar(20)
+  
+  // Settings
+  role                UserRole  @default(USER)
+  status              UserStatus @default(PENDING)
+  language            String    @default("ru") @db.VarChar(10)
+  timezone            String    @default("Europe/Moscow") @db.VarChar(50)
+  theme               String    @default("light") @db.VarChar(20) // light, dark, system
+  
+  // Timestamps
+  lastLoginAt         DateTime? @map("last_login_at")
+  lastActivityAt      DateTime? @map("last_activity_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  deletedAt           DateTime? @map("deleted_at")
+  
+  // Relations
+  sessions            Session[]
+  refreshTokens       RefreshToken[]
+  userDevices         UserDevice[]
+  
+  @@map("users")
+}
+
+model Session {
+  id                  String    @id @default(uuid())
+  userId              String    @map("user_id")
+  sessionToken        String    @unique @map("session_token") @db.VarChar(255)
+  ipAddress           String?   @map("ip_address") @db.VarChar(45)
+  userAgent           String?   @map("user_agent") @db.Text
+  location            String?   @db.VarChar(100)
+  deviceType          String?   @map("device_type") @db.VarChar(50) // web, mobile, desktop
+  isValid             Boolean   @map("is_valid") @default(true)
+  expiresAt           DateTime  @map("expires_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  
+  // Relations
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+model RefreshToken {
+  id                  String    @id @default(uuid())
+  userId              String    @map("user_id")
+  token               String    @unique @db.VarChar(255)
+  deviceId            String?   @map("device_id") @db.VarChar(255)
+  deviceName          String?   @map("device_name") @db.VarChar(100)
+  ipAddress           String?   @map("ip_address") @db.VarChar(45)
+  userAgent           String?   @map("user_agent") @db.Text
+  isValid             Boolean   @map("is_valid") @default(true)
+  expiresAt           DateTime  @map("expires_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  
+  // Relations
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("refresh_tokens")
+}
+
+model UserDevice {
+  id                  String    @id @default(uuid())
+  userId              String    @map("user_id")
+  deviceId            String    @unique @map("device_id") @db.VarChar(255)
+  deviceName          String    @map("device_name") @db.VarChar(100)
+  deviceType          String    @map("device_type") @db.VarChar(50) // web, mobile, desktop
+  platform            String?   @db.VarChar(50) // windows, macos, linux, ios, android
+  browser             String?   @db.VarChar(50)
+  ipAddress           String?   @map("ip_address") @db.VarChar(45)
+  lastActiveAt        DateTime  @map("last_active_at")
+  isTrusted           Boolean   @map("is_trusted") @default(false)
+  createdAt           DateTime  @default(now()) @map("created_at")
+  
+  // Relations
+  user                User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_devices")
+}
+
+// For rate limiting and security
+model LoginAttempt {
+  id                  String    @id @default(uuid())
+  email               String    @db.VarChar(255)
+  ipAddress           String    @map("ip_address") @db.VarChar(45)
+  userAgent           String?   @map("user_agent") @db.Text
+  success             Boolean   @default(false)
+  reason              String?   @db.VarChar(100) // wrong_password, user_not_found, etc.
+  createdAt           DateTime  @default(now()) @map("created_at")
+  
+  @@index([email, createdAt])
+  @@index([ipAddress, createdAt])
+  @@map("login_attempts")
+}

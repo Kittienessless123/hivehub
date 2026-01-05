@@ -1,0 +1,144 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum ProfileVisibility {
+  PUBLIC
+  PRIVATE
+  TEAM_ONLY
+  CONNECTIONS_ONLY
+}
+
+enum UserType {
+  FREELANCER
+  CLIENT
+  AGENCY
+  COMPANY
+}
+
+model UserProfile {
+  id                  String    @id @default(uuid())
+  userId              String    @unique @map("user_id") // Reference to auth service
+  userType            UserType  @map("user_type") @default(FREELANCER)
+  
+  // Personal info
+  displayName         String?   @map("display_name") @db.VarChar(100)
+  headline            String?   @db.VarChar(255)
+  bio                 String?   @db.Text
+  dateOfBirth         DateTime? @map("date_of_birth")
+  gender              String?   @db.VarChar(20)
+  
+  // Contact info
+  countryCode         String?   @map("country_code") @db.VarChar(2)
+  city                String?   @db.VarChar(100)
+  address             String?   @db.Text
+  postalCode          String?   @map("postal_code") @db.VarChar(20)
+  
+  // Professional info
+  jobTitle            String?   @map("job_title") @db.VarChar(100)
+  company             String?   @db.VarChar(100)
+  website             String?   @db.VarChar(255)
+  skills              Json      @default("[]") // Array of skill IDs from reference service
+  hourlyRate          Decimal?  @map("hourly_rate") @db.Decimal(10, 2)
+  currency            String    @default("USD") @db.VarChar(3)
+  
+  // Social links
+  githubUrl           String?   @map("github_url") @db.VarChar(255)
+  linkedinUrl         String?   @map("linkedin_url") @db.VarChar(255)
+  twitterUrl          String?   @map("twitter_url") @db.VarChar(255)
+  portfolioUrl        String?   @map("portfolio_url") @db.VarChar(255)
+  otherLinks          Json      @map("other_links") @default("[]")
+  
+  // Statistics
+  totalEarned         Decimal   @map("total_earned") @db.Decimal(12, 2) @default(0)
+  completedProjects   Int       @map("completed_projects") @default(0)
+  ongoingProjects     Int       @map("ongoing_projects") @default(0)
+  rating              Decimal   @db.Decimal(3, 2) @default(0)
+  reviewCount         Int       @map("review_count") @default(0)
+  responseRate        Decimal   @map("response_rate") @db.Decimal(5, 2) @default(0)
+  responseTime        Int?      @map("response_time") // in hours
+  
+  // Settings
+  visibility          ProfileVisibility @default(PUBLIC)
+  availableForWork    Boolean   @map("available_for_work") @default(true)
+  notificationEmail   Boolean   @map("notification_email") @default(true)
+  notificationPush    Boolean   @map("notification_push") @default(true)
+  
+  // Metadata
+  metadata            Json      @default("{}")
+  lastUpdatedAt       DateTime  @map("last_updated_at") @default(now())
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  experiences         Experience[]
+  educations          Education[]
+  certifications      Certification[]
+  
+  @@map("user_profiles")
+}
+
+model Experience {
+  id                  String    @id @default(uuid())
+  userId              String    @map("user_id")
+  title               String    @db.VarChar(255)
+  company             String    @db.VarChar(255)
+  location            String?   @db.VarChar(100)
+  description         String?   @db.Text
+  employmentType      String    @map("employment_type") @db.VarChar(50) // full-time, part-time, contract, freelance
+  startDate           DateTime  @map("start_date")
+  endDate             DateTime? @map("end_date")
+  currentlyWorking    Boolean   @map("currently_working") @default(false)
+  skills              Json      @default("[]")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  profile             UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("experiences")
+}
+
+model Education {
+  id                  String    @id @default(uuid())
+  userId              String    @map("user_id")
+  institution         String    @db.VarChar(255)
+  degree              String    @db.VarChar(255)
+  fieldOfStudy        String    @map("field_of_study") @db.VarChar(255)
+  description         String?   @db.Text
+  startDate           DateTime  @map("start_date")
+  endDate             DateTime? @map("end_date")
+  currentlyStudying   Boolean   @map("currently_studying") @default(false)
+  grade               String?   @db.VarChar(50)
+  activities          Json      @default("[]")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  profile             UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("educations")
+}
+
+model Certification {
+  id                  String    @id @default(uuid())
+  userId              String    @map("user_id")
+  name                String    @db.VarChar(255)
+  issuer              String    @db.VarChar(255)
+  issueDate           DateTime  @map("issue_date")
+  expirationDate      DateTime? @map("expiration_date")
+  credentialId        String?   @map("credential_id") @db.VarChar(255)
+  credentialUrl       String?   @map("credential_url") @db.VarChar(255)
+  skills              Json      @default("[]")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
+  
+  // Relations
+  profile             UserProfile @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("certifications")
+}

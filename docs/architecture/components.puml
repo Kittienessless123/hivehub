@@ -1,0 +1,71 @@
+@startuml Components Diagram
+title HiveHub Service Components
+
+component "API Gateway" {
+  [Router]
+  [Rate Limiter]
+  [Auth Middleware]
+  [Logging]
+}
+
+component "Auth Service" {
+  [Auth Controller]
+  [JWT Service]
+  [Password Service]
+  [Session Manager]
+}
+
+component "User Service" {
+  [Profile Controller]
+  [Statistics Service]
+  [Rating Calculator]
+  [Search Indexer]
+}
+
+component "Reference Service" {
+  [Country Service]
+  [Currency Service]
+  [Skills Service]
+  [Cache Manager]
+}
+
+component "Database Layer" {
+  [Prisma Client]
+  [Repositories]
+  [Migrations]
+  [Seeders]
+}
+
+component "Message Queue" {
+  [Producer]
+  [Consumer]
+  [Event Handler]
+  [Dead Letter Queue]
+}
+
+[API Gateway] --> [Auth Service] : HTTP/REST
+[API Gateway] --> [User Service] : HTTP/REST
+[Auth Service] --> [Database Layer] : Prisma
+[User Service] --> [Database Layer] : Prisma
+[Reference Service] --> [Database Layer] : Prisma
+
+[Auth Service] --> [Message Queue] : AMQP
+[User Service] --> [Message Queue] : AMQP
+
+[Reference Service] --> [Redis] : Cache
+
+note top of [API Gateway]
+  Single entry point
+  Request validation
+  Response formatting
+  Error handling
+end note
+
+note right of [Message Queue]
+  Async communication
+  Event-driven architecture
+  Decoupled services
+  Retry mechanism
+end note
+
+@enduml

@@ -1,0 +1,129 @@
+@startuml HIVEHUB Database Schema
+skinparam linetype ortho
+title Database Architecture
+
+package "PostgreSQL Cluster" {
+  database "auth_db" {
+    entity "users" as AuthUsers {
+      + id: UUID [PK]
+      + email: VARCHAR(255) [UNIQUE]
+      + password_hash: VARCHAR(255)
+      + is_email_verified: BOOLEAN
+      + role: VARCHAR(50)
+      + status: VARCHAR(50)
+      + created_at: TIMESTAMP
+      + updated_at: TIMESTAMP
+    }
+    
+    entity "sessions" as AuthSessions {
+      + id: UUID [PK]
+      + user_id: UUID [FK]
+      + session_token: VARCHAR(255)
+      + expires_at: TIMESTAMP
+      + created_at: TIMESTAMP
+    }
+    
+    entity "refresh_tokens" as AuthRefreshTokens {
+      + id: UUID [PK]
+      + user_id: UUID [FK]
+      + token: VARCHAR(255)
+      + is_valid: BOOLEAN
+      + expires_at: TIMESTAMP
+    }
+  }
+  
+  database "user_db" {
+    entity "user_profiles" as UserProfiles {
+      + id: UUID [PK]
+      + user_id: UUID [UNIQUE]
+      + first_name: VARCHAR(100)
+      + last_name: VARCHAR(100)
+      + bio: TEXT
+      + skills: JSONB
+      + hourly_rate: DECIMAL(10,2)
+      + rating: DECIMAL(3,2)
+      + created_at: TIMESTAMP
+    }
+    
+    entity "experiences" as Experiences {
+      + id: UUID [PK]
+      + user_id: UUID [FK]
+      + title: VARCHAR(255)
+      + company: VARCHAR(255)
+      + start_date: DATE
+      + end_date: DATE
+    }
+    
+    entity "educations" as Educations {
+      + id: UUID [PK]
+      + user_id: UUID [FK]
+      + institution: VARCHAR(255)
+      + degree: VARCHAR(255)
+      + field_of_study: VARCHAR(255)
+    }
+  }
+  
+  database "reference_db" {
+    entity "countries" as Countries {
+      + id: UUID [PK]
+      + iso_code: VARCHAR(2) [UNIQUE]
+      + name_ru: VARCHAR(100)
+      + name_en: VARCHAR(100)
+      + phone_code: VARCHAR(10)
+      + currency_code: VARCHAR(3)
+      + flag_emoji: VARCHAR(10)
+    }
+    
+    entity "currencies" as Currencies {
+      + id: UUID [PK]
+      + code: VARCHAR(3) [UNIQUE]
+      + name_ru: VARCHAR(100)
+      + name_en: VARCHAR(100)
+      + symbol: VARCHAR(10)
+    }
+    
+    entity "skills" as Skills {
+      + id: UUID [PK]
+      + name_ru: VARCHAR(100)
+      + name_en: VARCHAR(100)
+      + category_id: UUID [FK]
+      + popularity: INTEGER
+    }
+    
+    entity "skill_categories" as SkillCategories {
+      + id: UUID [PK]
+      + name_ru: VARCHAR(100)
+      + name_en: VARCHAR(100)
+      + order_index: INTEGER
+    }
+  }
+}
+
+' Relationships
+AuthUsers ||..o{ AuthSessions : has
+AuthUsers ||..o{ AuthRefreshTokens : has
+
+UserProfiles ||..o{ Experiences : has
+UserProfiles ||..o{ Educations : has
+
+SkillCategories ||..o{ Skills : contains
+
+note right of AuthUsers
+  Core authentication data
+  JWT token generation
+  Email verification
+end note
+
+note right of UserProfiles
+  Extended user information
+  Freelancer/Client profiles
+  Skills and ratings
+end note
+
+note right of Countries
+  Reference data
+  Multi-language support
+  Phone/currency codes
+end note
+
+@enduml

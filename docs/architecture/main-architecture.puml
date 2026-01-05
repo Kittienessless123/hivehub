@@ -1,0 +1,79 @@
+@startuml HIVEHUB Architecture
+!define RECTANGLE class
+skinparam componentStyle rectangle
+skinparam linetype ortho
+
+title HIVEHUB - Microservices Architecture
+
+package "API Layer" {
+  [API Gateway\nlocalhost:3000] as Gateway
+  [NGINX\nLoad Balancer] as Nginx
+}
+
+package "Core Services" {
+  [Auth Service\nlocalhost:3001] as AuthService
+  [User Service\nlocalhost:3002] as UserService
+  [Reference Service\nlocalhost:3010] as ReferenceService
+}
+
+package "Business Services" {
+  [Workspace Service] as WorkspaceService
+  [Project Service] as ProjectService
+  [Payment Service] as PaymentService
+  [Chat Service] as ChatService
+}
+
+package "Infrastructure" {
+  database "PostgreSQL\nAuth & Reference DB" as PostgresAuth
+  database "PostgreSQL\nUser & Business DB" as PostgresMain
+  [Redis\nCache & Sessions] as Redis
+  [RabbitMQ\nMessage Broker] as RabbitMQ
+}
+
+package "Monitoring" {
+  [Prometheus] as Prometheus
+  [Grafana] as Grafana
+  [Jaeger] as Jaeger
+}
+
+' Connections
+Nginx --> Gateway
+
+Gateway --> AuthService
+Gateway --> UserService
+Gateway --> ReferenceService
+Gateway --> WorkspaceService
+Gateway --> ProjectService
+Gateway --> PaymentService
+Gateway --> ChatService
+
+AuthService --> PostgresAuth
+ReferenceService --> PostgresAuth
+UserService --> PostgresMain
+WorkspaceService --> PostgresMain
+ProjectService --> PostgresMain
+
+AuthService --> Redis
+AuthService --> RabbitMQ
+UserService --> RabbitMQ
+
+Prometheus --> AuthService
+Prometheus --> UserService
+Jaeger --> Gateway
+Jaeger --> AuthService
+
+note right of Gateway
+  Single entry point
+  Request routing
+  Rate limiting
+  CORS handling
+end note
+
+note right of AuthService
+  Authentication
+  Authorization
+  User management
+  Session handling
+end note
+
+@enduml

@@ -1,0 +1,48 @@
+API Gateway (:3000)
+text
+GET    /health                          ← Health check
+GET    /docs                           ← API Documentation
+
+├── /auth/*                           → Auth Service (3001)
+├── /users/*                          → User Service (3002)
+└── /reference/*                      → Reference Service (3010)
+
+
+Auth Service (:3001)
+text
+POST   /auth/register                  ← Регистрация
+POST   /auth/login                     ← Логин
+POST   /auth/refresh                   ← Refresh token
+POST   /auth/logout                    ← Выход
+GET    /auth/me                        ← Получить текущего пользователя
+PUT    /auth/me                        ← Обновить профиль
+POST   /auth/verify-email              ← Верификация email
+POST   /auth/forgot-password           ← Забыли пароль
+POST   /auth/reset-password            ← Сброс пароля
+GET    /auth/sessions                  ← Активные сессии
+DELETE /auth/sessions/:id              ← Завершить сессию
+
+
+User Service (:3002)
+text
+GET    /users/:id/profile              ← Получить профиль
+PUT    /users/:id/profile              ← Обновить профиль
+GET    /users/:id/experiences          ← Получить опыт
+POST   /users/:id/experiences          ← Добавить опыт
+PUT    /users/:id/experiences/:expId   ← Обновить опыт
+DELETE /users/:id/experiences/:expId   ← Удалить опыт
+GET    /users/:id/educations           ← Образование
+GET    /users/:id/certifications       ← Сертификаты
+GET    /users/:id/stats                ← Статистика
+
+Reference Service (:3010)
+text
+GET    /reference/countries            ← Список стран
+GET    /reference/countries/:code      ← Страна по коду
+GET    /reference/currencies           ← Валюты
+GET    /reference/skills               ← Навыки
+GET    /reference/skills/categories    ← Категории навыков
+GET    /reference/languages            ← Языки
+GET    /reference/timezones            ← Часовые пояса
+GET    /reference/industries           ← Отрасли
+GET    /reference/contract-templates   ← Шаблоны договоров

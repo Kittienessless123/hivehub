@@ -1,0 +1,42 @@
+hivehub/
+├── 📁 .github/workflows/           # CI/CD пайплайны
+├── 📁 clients/                     # Клиентские приложения
+│   ├── 📁 web/                     # React SPA
+│   ├── 📁 desktop/                 # Electron app
+│   └── 📁 mobile/                  # React Native
+├── 📁 services/                    # Микросервисы
+│   ├── 📁 api-gateway/            # Единая точка входа
+│   ├── 📁 auth-service/           # Аутентификация
+│   ├── 📁 user-service/           # Пользователи и профили
+│   ├── 📁 reference-service/      # Справочные данные
+│   ├── 📁 workspace-service/      # Рабочие пространства
+│   ├── 📁 project-service/        # Проекты и задачи
+│   ├── 📁 payment-service/        # Платежи
+│   ├── 📁 notification-service/   # Уведомления
+│   ├── 📁 chat-service/           # Чат и сообщения
+│   ├── 📁 analytics-service/      # Аналитика
+│   ├── 📁 ai-service/             # ИИ помощник
+│   ├── 📁 storage-service/        # Файловое хранилище
+│   └── 📁 admin-service/          # Админ-панель
+├── 📁 shared/                      # Общий код
+│   ├── 📁 types/                  # TypeScript типы
+│   ├── 📁 contracts/              # API контракты
+│   └── 📁 schemas/                # Валидационные схемы
+├── 📁 infra/                       # Инфраструктура
+│   ├── 📁 nginx/                  # Конфигурация nginx
+│   ├── 📁 prometheus/             # Мониторинг
+│   ├── 📁 grafana/                # Дашборды
+│   └── 📁 postgres/               # SQL инициализация
+├── 📁 libs/                       # Библиотеки
+│   ├── 📁 ui-library/             # Компоненты UI
+│   └── 📁 design-system/          # Дизайн-система
+├── 📁 docs/                       # Документация
+│   ├── 📁 api/                    # API спецификации
+│   ├── 📁 architecture/           # Архитектурные решения
+│   └── 📁 deployment/             # Инструкции по деплою
+├── 📄 docker-compose.yml          # Основной compose файл
+├── 📄 docker-compose.dev.yml      # Для разработки
+├── 📄 docker-compose.prod.yml     # Для продакшена
+├── 📄 .env.example                # Пример переменных окружения
+├── 📄 README.md                   # Описание проекта
+└── 📄 package.json                # Корневой package.json

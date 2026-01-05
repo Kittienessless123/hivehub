@@ -1,0 +1,44 @@
+services:
+  postgres-auth:
+    image: postgres:15
+    container_name: hivehub-postgres-auth
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: hivehub
+      POSTGRES_PASSWORD: hivehub123
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_auth_data:/var/lib/postgresql/data
+
+  postgres-main:
+    image: postgres:15
+    container_name: hivehub-postgres-main
+    environment:
+      POSTGRES_DB: main_db
+      POSTGRES_USER: hivehub
+      POSTGRES_PASSWORD: hivehub123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_main_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: hivehub-redis
+    ports:
+      - "6379:6379"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: hivehub-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+volumes:
+  postgres_auth_data:
+  postgres_main_data:

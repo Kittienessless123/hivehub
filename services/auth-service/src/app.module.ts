@@ -14,8 +14,8 @@ import { HealthModule } from './health/health.module';
     PrismaModule,
     HealthModule,
     ConfigModule.forRoot({
-      isGlobal: true, // Доступен во всех модулях
-      envFilePath: '.env', // Ищет .env файл
+      isGlobal: true,
+      envFilePath: '.env',
     }),
   ],
   controllers: [AppController],

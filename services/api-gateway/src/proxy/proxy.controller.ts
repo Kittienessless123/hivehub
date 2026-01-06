@@ -1,4 +1,4 @@
-import { Controller, All, Req, Res, HttpStatus, Get } from '@nestjs/common';
+import { Controller, All, Req, Res, Get } from '@nestjs/common';
 import express from 'express';
 import { ProxyService } from './proxy.service';
 

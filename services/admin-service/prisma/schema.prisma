@@ -1,0 +1,25 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  role      String   @default("admin") // admin, moderator
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdminLog {
+  id        String   @id @default(cuid())
+  action    String
+  userId    String
+  details   Json?
+  ipAddress String?
+  userAgent String?
+  createdAt DateTime @default(now())
+}

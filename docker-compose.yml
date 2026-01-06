@@ -1,9 +1,94 @@
 version: "3.8"
 
 services:
-  # Базы данных
+  # ==================== NGINX GATEWAY ====================
+  nginx:
+    build:
+      context: ./infra/nginx
+      dockerfile: Dockerfile
+    container_name: hivehub-nginx
+    ports:
+      - "8080:80"
+    depends_on:
+      - api-gateway
+    networks:
+      - hivehub-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/nginx-health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # ==================== API GATEWAY (NestJS) ====================
+  api-gateway:
+    build:
+      context: ./services/api-gateway
+      dockerfile: Dockerfile.dev
+    container_name: hivehub-api-gateway
+    expose:
+      - "3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672
+      # Service URLs для проксирования
+      - AUTH_SERVICE_URL=http://auth-service:3001
+      - USER_SERVICE_URL=http://user-service:3002
+      - REFERENCE_SERVICE_URL=http://reference-service:3010
+      - ADMIN_SERVICE_URL=http://admin-service:3003
+      - WORKSPACE_SERVICE_URL=http://workspace-service:3004
+      - PROJECT_SERVICE_URL=http://project-service:3005
+      - TASK_SERVICE_URL=http://task-service:3006
+      - CHAT_SERVICE_URL=http://chat-service:3007
+      - PAYMENT_SERVICE_URL=http://payment-service:3008
+      - NOTIFICATION_SERVICE_URL=http://notification-service:3009
+      - ANALYSIS_SERVICE_URL=http://analysis-service:3011
+      - AI_SERVICE_URL=http://ai-service:3012
+      - STORAGE_SERVICE_URL=http://storage-service:3013
+      - DISPUTE_SERVICE_URL=http://dispute-service:3014
+      - REPORT_SERVICE_URL=http://report-service:3015
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - hivehub-network
+    volumes:
+      - ./services/api-gateway:/app
+      - /app/node_modules
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  # ==================== MESSAGE BROKER ====================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: hivehub-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: admin123
+      RABBITMQ_DEFAULT_VHOST: /
+    ports:
+      - "5672:5672"    # AMQP protocol
+      - "15672:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_logs:/var/log/rabbitmq
+    networks:
+      - hivehub-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==================== DATABASES ====================
   postgres-auth:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: hivehub-postgres-auth
     environment:
       POSTGRES_DB: auth_db
@@ -13,43 +98,68 @@ services:
       - "5433:5432"
     volumes:
       - postgres_auth_data:/var/lib/postgresql/data
+    networks:
+      - hivehub-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U hivehub"]
+      test: ["CMD-SHELL", "pg_isready -U hivehub -d auth_db"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
-  # Кэш и очереди
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: hivehub-rabbitmq
+  postgres-main:
+    image: postgres:15-alpine
+    container_name: hivehub-postgres-main
     environment:
-      RABBITMQ_DEFAULT_USER: admin
-      RABBITMQ_DEFAULT_PASS: admin123
+      POSTGRES_DB: main_db
+      POSTGRES_USER: hivehub
+      POSTGRES_PASSWORD: hivehub123
     ports:
-      - "5672:5672"
-      - "15672:15672"
+      - "5432:5432"
+    volumes:
+      - postgres_main_data:/var/lib/postgresql/data
+    networks:
+      - hivehub-network
     healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      test: ["CMD-SHELL", "pg_isready -U hivehub -d main_db"]
       interval: 10s
       timeout: 5s
       retries: 5
+    restart: unless-stopped
 
-  # Auth Service
+  # ==================== CACHE ====================
+  redis:
+    image: redis:7-alpine
+    container_name: hivehub-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - hivehub-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ==================== CORE SERVICES ====================
   auth-service:
     build:
-      context: ./services/auth-service  # ← ПРАВИЛЬНЫЙ ПУТЬ
+      context: ./services/auth-service
       dockerfile: Dockerfile.dev
     container_name: hivehub-auth-service
     ports:
       - "3001:3001"
     environment:
       - NODE_ENV=development
+      - PORT=3001
       - DATABASE_URL=postgresql://hivehub:hivehub123@postgres-auth:5432/auth_db
+      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672
       - JWT_SECRET=your-super-secret-jwt-key-change-this-in-production
       - JWT_EXPIRES_IN=15m
       - REFRESH_TOKEN_EXPIRES_IN=7d
-      - RABBITMQ_URL=amqp://admin:admin123@rabbitmq:5672
     depends_on:
       postgres-auth:
         condition: service_healthy
@@ -57,37 +167,50 @@ services:
         condition: service_healthy
     networks:
       - hivehub-network
+    volumes:
+      - ./services/auth-service:/app
+      - /app/node_modules
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3001/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-    volumes:
-      - ./services/auth-service:/app  # ← ПРАВИЛЬНЫЙ ПУТЬ
-      - /app/node_modules
+    restart: unless-stopped
 
-  # API Gateway (ТОЖЕ ВНУТРИ SERVICES!)
-  api-gateway:
-    build:
-      context: ./services/api-gateway  # ← ИЗМЕНИЛ!
-      dockerfile: Dockerfile.dev
-    container_name: hivehub-api-gateway
+  # ==================== BUSINESS SERVICES (ЗАГЛУШКИ) ====================
+
+  # ==================== MONITORING (опционально) ====================
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: hivehub-prometheus
     ports:
-      - "8080:3000"
-    environment:
-      - NODE_ENV=development
-      - AUTH_SERVICE_URL=http://auth-service:3001
+      - "9090:9090"
     volumes:
-      - ./services/api-gateway:/app  # ← ИЗМЕНИЛ!
-      - /app/node_modules
-    depends_on:
-      - auth-service
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
     networks:
       - hivehub-network
+    restart: unless-stopped
 
 networks:
   hivehub-network:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 
 volumes:
+  # Databases
   postgres_auth_data:
+  postgres_main_data:
+  
+  # Message broker
+  rabbitmq_data:
+  rabbitmq_logs:
+  
+  # Cache
+  redis_data:
+  
+  # Monitoring
+  prometheus_data:
+  grafana_data:

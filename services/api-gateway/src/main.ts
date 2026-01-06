@@ -8,18 +8,17 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // Включаем CORS
+  const corsOrigins = configService
+    .get<string>('CORS_ORIGINS', 'http://localhost:5173')
+    .split(',');
+
   app.enableCors({
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-    origin: configService
-      .get('CORS_ORIGINS', 'http://localhost:5173')
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      .split(','),
+    origin: corsOrigins,
     credentials: true,
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-  const port = configService.get('PORT', 3000);
-  await app.listen(port);
+  const port = configService.get<number>('PORT', 3000);
+  await app.listen(port, '0.0.0.0');
 
   const logger = new Logger('Bootstrap');
   logger.log(`API Gateway running on port ${port}`);

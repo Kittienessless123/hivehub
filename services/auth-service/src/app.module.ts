@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
@@ -7,7 +8,16 @@ import { PrismaModule } from './prisma/prisma.module';
 import { HealthModule } from './health/health.module';
 
 @Module({
-  imports: [AuthModule, UsersModule, PrismaModule, HealthModule],
+  imports: [
+    AuthModule,
+    UsersModule,
+    PrismaModule,
+    HealthModule,
+    ConfigModule.forRoot({
+      isGlobal: true, // Доступен во всех модулях
+      envFilePath: '.env', // Ищет .env файл
+    }),
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

@@ -10,7 +10,8 @@ export class AppController {
       version: '1.0.0',
       endpoints: {
         auth: '/auth/*',
-        /*   users: '/users/*',
+        users: '/users/*',
+        /*
         reference: '/reference/*', */
       },
     };
@@ -25,7 +26,7 @@ export class AppController {
       timestamp: new Date().toISOString(),
       upstream: {
         auth: 'http://localhost:3001',
-        // users: 'http://localhost:3002',
+        users: 'http://localhost:3002',
         // reference: 'http://localhost:3010',
       },
     };

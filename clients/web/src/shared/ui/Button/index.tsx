@@ -15,7 +15,7 @@ interface ContainerProps {
   isRounded?: boolean;
 }
 
-export const StyledButton = styled.button<Props>`
+export const Button = styled.button<Props>`
   background-color: ${({ theme }) => theme.components.background.primary};
   color: ${({ theme }) => theme.components.text.primary};
   padding: ${({ theme }) => theme.spacing.m};

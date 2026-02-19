@@ -1,0 +1,16 @@
+{
+  "appName": "HiveHub",
+  "loading": "Loading...",
+  "save": "Save",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "edit": "Edit",
+  "create": "Create",
+  "search": "Search",
+  "filter": "Filter",
+  "actions": "Actions",
+  "confirm": "Confirm",
+  "back": "Back",
+  "next": "Next",
+  "close": "Close"
+}

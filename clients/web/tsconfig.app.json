@@ -7,7 +7,7 @@
     "module": "ESNext",
     "types": ["vite/client"],
     "skipLibCheck": true,
-
+    "preserveWatchOutput": true,
     /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
@@ -15,14 +15,24 @@
     "moduleDetection": "force",
     "noEmit": true,
     "jsx": "react-jsx",
-
     /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": false,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "baseUrl": "./src",
+    "paths": {
+      "entities/*": ["entities/*"],
+      "pages/*": ["pages/*"],
+      "shared/*": ["shared/*"]
+    },
+   /*  "typeRoots": [
+      "./node_modules/@types",
+      "./src/@types",
+      "./src/app/styles" 
+    ] */
   },
   "include": ["src"]
 }

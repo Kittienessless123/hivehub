@@ -2,7 +2,7 @@ import {ThemeEnum, type ITheme } from './styled.ts';
 
 export const lightTheme: ITheme = {
   type: ThemeEnum.light,
-  name: 'Светлая',
+  name: 'Light',
   
   colors: {
     primary: '#1976d2',
@@ -104,7 +104,7 @@ export const lightTheme: ITheme = {
 
 export const darkTheme: ITheme = {
   type: ThemeEnum.dark,
-  name: 'Темная',
+  name: 'Dark',
   
   colors: {
     primary: '#90caf9',      // более светлый синий для темной темы

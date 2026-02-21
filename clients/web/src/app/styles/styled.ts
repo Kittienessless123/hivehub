@@ -26,6 +26,8 @@ export interface IComponentColors {
     secondary: string;
     ghost: string;
     disabled: string;
+   
+
   };
   
   background: {

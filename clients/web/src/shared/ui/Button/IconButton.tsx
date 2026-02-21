@@ -1,102 +1,149 @@
-import { match } from "../../lib/match.ts";
-import { ComponentProps } from "react";
-import styled, { css } from "styled-components";
+import React from "react";
+import styled, { css, type DefaultTheme } from "styled-components";
+import { borderRadius } from "shared/lib/styled/borderRadius";
+import { centerContent } from "shared/lib/styled/centerContent";
+import { Loader } from "shared/ui/Loader";
 
-import { MergeRefs } from "../../lib/MergeRefs";
-import { borderRadius } from "../../lib/borderRadius";
-import { centerContent } from "../../lib/centerContent";
-import { interactive } from "../../lib/interactive";
-import { sameDimensions } from "../../lib/sameDimensions";
-import { toSizeUnit } from "../../lib/toSizeUnit.tsx";
+type ButtonType = "primary" | "secondary" | "ghost";
 
-import { Tooltip } from "../tooltip";
-import { UnstyledButton } from "./UnstyledButton";
-
-export const iconButtonSizes = ["s", "m", "l"] as const;
-export type IconButtonSize = (typeof iconButtonSizes)[number];
-
-export const iconButtonSizeRecord: Record<IconButtonSize, number> = {
-  s: 24,
-  m: 32,
-  l: 40,
+type ButtonProps = {
+  $type?: ButtonType;
+  icon?: React.ReactNode;
+  text?: React.ReactNode;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  href?: string;
+  disabled?: boolean;
+  loading?: boolean;
 };
 
-export const iconButtonIconSizeRecord: Record<IconButtonSize, number> = {
-  s: 14,
-  m: 14,
-  l: 16,
+type ButtonStyleProps = {
+  $type?: ButtonType;
+  disabled?: boolean;
+  $hasIcon?: boolean;
+  $hasText?: boolean;
+  $isIconOnly?: boolean;
 };
 
-type IconButtonContainerParams = {
-  size?: IconButtonSize;
-  isDisabled?: boolean;
+type ThemedProps = ButtonStyleProps & { theme: DefaultTheme };
+
+// Утилиты для получения цветов на основе типа и состояния
+const getBackgroundColor = (props: ThemedProps): string => {
+  const { theme, $type, disabled } = props;
+  if (disabled) return theme.components.button.disabled;
+  
+  switch ($type) {
+    case "primary": return theme.components.button.primary;
+    case "secondary": return theme.components.button.secondary;
+    case "ghost": return theme.components.button.ghost;
+    default: return theme.components.button.primary;
+  }
 };
 
-export const iconButtonContainer = ({
-  size = "m",
-  isDisabled = false,
-}: IconButtonContainerParams) => css`
-  ${interactive};
-  position: relative;
-  ${centerContent};
-  ${sameDimensions(iconButtonSizeRecord[size])};
-  background: transparent;
-  color: black;
+const getTextColor = (props: ThemedProps): string => {
+  const { theme, $type, disabled } = props;
+  if (disabled) return theme.components.text.disabled;
+  
+  switch ($type) {
+    case "primary": return theme.components.text.primary;
+    case "secondary": return theme.components.text.secondary;
+    case "ghost": return theme.components.text.link;
+    default: return theme.components.text.primary;
+  }
+};
 
-  font-size: ${toSizeUnit(iconButtonIconSizeRecord[size])};
+// Общие стили для кнопок
+const buttonBaseStyles = css<ButtonStyleProps>`
+  background-color: ${getBackgroundColor};
+  color: ${getTextColor};
+  border: none;
+  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  opacity: ${({ disabled }) => (disabled ? 0.6 : 1)};
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
-  ${borderRadius.s};
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 
-  cursor: ${isDisabled ? "initial" : "pointer"};
-  opacity: ${isDisabled ? 0.8 : 1};
+  &:hover {
+    ${({ disabled }) =>
+      !disabled &&
+      css`
+        filter: brightness(0.95);
+      `}
+  }
 `;
 
-const Container = styled(UnstyledButton)<IconButtonContainerParams>`
-  ${iconButtonContainer};
+// Стили для обычной кнопки (с текстом)
+const RegularButton = styled.button<ButtonStyleProps>`
+  ${buttonBaseStyles}
+  padding: ${({ theme }) => theme.spacing.m}px;
+  gap: 8px;
+  white-space: nowrap;
+  overflow: hidden;
 `;
 
-export type IconButtonProps = Omit<
-  ComponentProps<typeof Container>,
-  "isDisabled"
-> & {
-  icon: React.ReactNode;
-  size?: IconButtonSize;
-  title: string;
-  as?: React.ElementType;
-  isDisabled?: boolean | string;
-};
+// Стили для иконочной кнопки (без текста)
+const IconButton = styled.button<ButtonStyleProps>`
+  ${buttonBaseStyles}
+  ${centerContent}
+  ${borderRadius.round}
+  width: 40px;
+  height: 40px;
+  padding: 0;
+`;
 
-export function IconButton({
-  icon,
-  isDisabled = false,
-  onClick,
-  ...rest
-}: IconButtonProps) {
-  const containerProps = {
-    isDisabled: !!isDisabled,
-    onClick: isDisabled ? undefined : onClick,
-    ...rest,
+// Компонент содержимого кнопки для переиспользования
+const ButtonContent: React.FC<{ loading?: boolean; icon?: React.ReactNode; text?: React.ReactNode }> = 
+  ({ loading, icon, text }) => (
+    <>
+      {loading && <Loader />}
+      {!loading && icon}
+      {!loading && text && <span>{text}</span>}
+    </>
+  );
+
+export const Button = (props: ButtonProps) => {
+  const { 
+    $type, 
+    icon, 
+    onClick, 
+    text, 
+    href, 
+    disabled = false, 
+    loading = false, 
+    ...rest 
+  } = props;
+
+  const isIconOnly = !text && !!icon;
+  const commonProps = {
+    disabled: disabled || loading,
+    $type,
+    ...rest
   };
 
-  const buttonContent = <Container {...containerProps}>{icon}</Container>;
+  const buttonContent = <ButtonContent loading={loading} icon={icon} text={text} />;
 
-  if (typeof isDisabled === "string") {
+  // Если есть href - рендерим ссылку
+  if (href) {
     return (
-      <Tooltip
-        content={isDisabled}
-        renderOpener={({ ref: tooltipRef, ...tooltipRest }) => (
-          <MergeRefs
-            refs={[rest.ref, tooltipRef]}
-            render={(mergedRef) => (
-              <Container ref={mergedRef} {...containerProps} {...tooltipRest}>
-                {icon}
-              </Container>
-            )}
-          />
-        )}
-      />
+      <a href={href} style={{ textDecoration: 'none' }}>
+        <RegularButton as="span" {...commonProps}>
+          {buttonContent}
+        </RegularButton>
+      </a>
     );
   }
 
-  return buttonContent;
-}
+  // Выбираем соответствующий компонент в зависимости от наличия текста
+  const ButtonComponent = isIconOnly ? IconButton : RegularButton;
+
+  return (
+    <ButtonComponent onClick={onClick} {...commonProps}>
+      {buttonContent}
+    </ButtonComponent>
+  );
+};

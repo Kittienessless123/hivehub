@@ -1,27 +1,35 @@
-import React  from "react";
-import styled from 'styled-components'
-type Props = {
+import styled, { css } from "styled-components";
+
+type Direction = "vertical" | "horizontal";
+
+type DividerProps = {
   className?: string;
-  children?: React.ReactNode;
- }
-const Container = styled.div`
- display: flex;
+  direction?: Direction;
+};
+const DividerLine = styled.div<DividerProps>`
+  display: flex;
   align-items: center;
   margin-top: 15px;
   margin-bottom: 20px;
-`
-const Border = styled.div`
- border-bottom: 1px solid rgb(202, 202, 202);
-  width: 100%;
-`
+  content: "";
+  background-color: ${({ theme }) => theme.components.background.tertiary};
 
+  ${(props) =>
+    props.direction === "horizontal"
+      ? css`
+          width: 98%;
+          height: 0.3px;
+        `
+      : css`
+          width: 0.3px;
+          height: 98%;
+        `}
+`;
 
+export const Divider = (props: DividerProps) => {
+  const { className, direction } = props;
 
-export const Divider = ({...restTooltipProps } : Props) => {
   return (
-    <Container    {...restTooltipProps}>
-      <Border />
-       <Border  />
-    </Container>
+    <DividerLine className={className} direction={direction}></DividerLine>
   );
 };

@@ -1,4 +1,4 @@
-import styled, {css } from "styled-components";
+import styled, { css } from "styled-components";
 
 import React from "react";
 
@@ -83,21 +83,18 @@ export const text = ({
     css`
       line-height: ${lineHeight.l} !important;
     `};
-     
   }
   @media (width <= 1050px) {
     ${height &&
     css`
       line-height: ${lineHeight.m} !important;
     `};
-      
   }
-    @media (width <= 900px) {
+  @media (width <= 900px) {
     ${height &&
     css`
       line-height: ${lineHeight.s} !important;
     `};
-      
   }
 `;
 

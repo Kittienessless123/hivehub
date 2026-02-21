@@ -33,6 +33,8 @@ export interface IComponentColors {
     secondary: string;
     tertiary: string;
     overlay: string;
+    blur: string;        // добавлено
+    inverted: string;    // добавлено
   };
   
   text: {
@@ -49,6 +51,8 @@ export interface IComponentColors {
     light: string;
     focus: string;       
     error: string;
+    ghost: string;        // добавлено
+    dashed: string;       // добавлено
   };
   
   state: {

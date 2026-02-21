@@ -1,4 +1,4 @@
-import React, { Ref } from "react";
+/* import React, { Ref } from "react";
 import styled, { css } from "styled-components";
 
 type Props = {
@@ -22,3 +22,4 @@ export const Button = styled.button<Props>`
   
 `;
 
+ */

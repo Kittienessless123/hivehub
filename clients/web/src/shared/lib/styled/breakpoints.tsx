@@ -1,6 +1,6 @@
 import { css } from 'styled-components'
 
-type BreakpointSize = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl'
+export type BreakpointSize = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl'
 type BreakpointDirection = 'min-width' | 'max-width' | 'min-height' | 'max-height'
 
 const breakpointValues: Record<BreakpointSize, number> = {

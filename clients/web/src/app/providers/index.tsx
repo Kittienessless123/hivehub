@@ -1,5 +1,5 @@
 import { type FC, type JSX } from "react";
-import { ThemeProviderWrapper as ThemeProvider } from "../styles/ThemeContext.ts";
+import { ThemeProviderWrapper as ThemeProvider } from "../styles/ThemeContext.tsx";
 
 
 interface IProviders {

@@ -1,6 +1,6 @@
 import { css } from 'styled-components'
 
-type BorderRadiusSize = 'xs' | 's' | 'm' | 'l' | 'xl' |'round' 
+export type BorderRadiusSize = 'xs' | 's' | 'm' | 'l' | 'xl' |'round' 
 
 export const borderRadius: Record<BorderRadiusSize, ReturnType<typeof css>> = {
   xs: css`

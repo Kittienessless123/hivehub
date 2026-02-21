@@ -1,4 +1,4 @@
-import {ThemeEnum, type ITheme } from './styled.ts';
+import { ThemeEnum, type ITheme } from './styled.ts';
 
 export const lightTheme: ITheme = {
   type: ThemeEnum.light,
@@ -39,6 +39,8 @@ export const lightTheme: ITheme = {
       secondary: '#f5f5f5',
       tertiary: '#eeeeee',
       overlay: 'rgba(0, 0, 0, 0.5)',
+      blur: 'rgba(255, 255, 255, 0.8)',        // полупрозрачный белый для эффекта размытия
+      inverted: '#212121',                      // инвертированный фон (темный на светлой теме)
     },
     
     text: {
@@ -55,6 +57,8 @@ export const lightTheme: ITheme = {
       light: '#f5f5f5',
       focus: '#1976d2',
       error: '#d32f2f',
+      ghost: 'rgba(0, 0, 0, 0.12)',            // полупрозрачная граница
+      dashed: '#9e9e9e',                        // цвет для пунктирной границы
     },
     
     state: {
@@ -107,16 +111,16 @@ export const darkTheme: ITheme = {
   name: 'Dark',
   
   colors: {
-    primary: '#90caf9',      // более светлый синий для темной темы
-    secondary: '#ce93d8',    // светлый фиолетовый
-    success: '#81c784',      // светлый зеленый
-    danger: '#f48fb1',       // светлый розовый/красный
-    warning: '#ffb74d',      // оранжевый
-    info: '#80deea',         // голубой
+    primary: '#90caf9',
+    secondary: '#ce93d8',
+    success: '#81c784',
+    danger: '#f48fb1',
+    warning: '#ffb74d',
+    info: '#80deea',
     
     white: '#ffffff',
     black: '#000000',
-    gray50: '#1e1e1e',       // самые темные оттенки
+    gray50: '#1e1e1e',
     gray100: '#2d2d2d',
     gray200: '#3d3d3d',
     gray300: '#4d4d4d',
@@ -137,17 +141,19 @@ export const darkTheme: ITheme = {
     },
     
     background: {
-      primary: '#121212',      // основной фон
-      secondary: '#1e1e1e',    // чуть светлее (карточки)
-      tertiary: '#2d2d2d',     // еще светлее (элементы)
-      overlay: 'rgba(0, 0, 0, 0.8)', // затемнение для модалок
+      primary: '#121212',
+      secondary: '#1e1e1e',
+      tertiary: '#2d2d2d',
+      overlay: 'rgba(0, 0, 0, 0.8)',
+      blur: 'rgba(18, 18, 18, 0.8)',           // полупрозрачный темный для эффекта размытия
+      inverted: '#ffffff',                       // инвертированный фон (белый на темной теме)
     },
     
     text: {
-      primary: '#ffffff',       // белый текст
-      secondary: '#b0b0b0',     // серый для второстепенного
-      disabled: '#5d5d5d',      // совсем бледный
-      inverse: '#121212',        // текст на светлых элементах
+      primary: '#ffffff',
+      secondary: '#b0b0b0',
+      disabled: '#5d5d5d',
+      inverse: '#121212',
       link: '#90caf9',
       linkHover: '#bbdefb',
     },
@@ -157,10 +163,12 @@ export const darkTheme: ITheme = {
       light: '#2d2d2d',
       focus: '#90caf9',
       error: '#f48fb1',
+      ghost: 'rgba(255, 255, 255, 0.12)',       // полупрозрачная граница
+      dashed: '#6d6d6d',                         // цвет для пунктирной границы
     },
     
     state: {
-      hover: 'rgba(255, 255, 255, 0.08)',  // белый оверлей
+      hover: 'rgba(255, 255, 255, 0.08)',
       active: 'rgba(255, 255, 255, 0.12)',
       selected: 'rgba(144, 202, 249, 0.16)',
       disabled: 'rgba(255, 255, 255, 0.08)',

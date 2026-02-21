@@ -26,13 +26,10 @@
     "paths": {
       "entities/*": ["entities/*"],
       "pages/*": ["pages/*"],
-      "shared/*": ["shared/*"]
+      "shared/*": ["shared/*"],
+      "app/*": ["app/*"]
     },
-   /*  "typeRoots": [
-      "./node_modules/@types",
-      "./src/@types",
-      "./src/app/styles" 
-    ] */
+ 
   },
   "include": ["src"]
 }

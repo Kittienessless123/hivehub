@@ -1,7 +1,5 @@
 import {
-  createRoutesFromElements,
   createHashRouter,
-  Route,
   RouterProvider,
   Navigate,
 } from "react-router-dom";
@@ -11,27 +9,37 @@ import { useThemeMode } from "../styles/useThemeMode.ts";
 import { DemoPage } from "pages/demo-page/DemoPage.tsx";
 import { Layout } from "app/layout/Layout.tsx";
 import { lightTheme, darkTheme } from "../styles/themes.ts";
-import {GlobalStyles} from "../styles/global.ts";
+import { GlobalStyles } from "../styles/global.ts";
+import { Fallback } from "shared/ui/Fallback/index.tsx";
 
 const AppContainer = styled.div`
-  
-  background-color: white;
-  color: black;
+  background-color: ${({ theme }) => theme.components.background.primary};
+  color: ${({ theme }) => theme.components.text.primary};
   transition: background-color 0.2s ease, color 0.2s ease;
+  min-height: 100vh;
 `;
 
 export const AppRouter = () => {
   const { theme } = useThemeMode();
   const themeMode = theme === "light" ? lightTheme : darkTheme;
 
-  const routers = createRoutesFromElements(
-    <Route path="/" element={<Layout />}>
-      <Route path="demo" element={<DemoPage />} />
-      <Route index element={<Navigate to="/demo" replace />} />
-    </Route>
-  );
-
-  const router = createHashRouter(routers, {});
+  const router = createHashRouter([
+    {
+      path: "/",
+      element: <Layout />,
+      errorElement: <Fallback />,
+      children: [
+        {
+          index: true,
+          element: <Navigate to="/demo" replace />,
+        },
+        {
+          path: "demo",
+          element: <DemoPage />,
+        },
+      ],
+    },
+  ]);
 
   return (
     <ThemeProvider theme={themeMode}>

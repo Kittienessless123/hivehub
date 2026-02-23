@@ -1,21 +1,18 @@
-import {
-  createHashRouter,
-  RouterProvider,
-  Navigate,
-} from "react-router-dom";
+import { createHashRouter, RouterProvider } from "react-router-dom";
 import styled, { ThemeProvider } from "styled-components";
 
 import { useThemeMode } from "../styles/useThemeMode.ts";
-import { DemoPage } from "pages/demo-page/DemoPage.tsx";
 import { Layout } from "app/layout/Layout.tsx";
 import { lightTheme, darkTheme } from "../styles/themes.ts";
 import { GlobalStyles } from "../styles/global.ts";
 import { Fallback } from "shared/ui/Fallback/index.tsx";
-
+import { routeChildren } from "shared/types/routes.types.tsx";
 const AppContainer = styled.div`
   background-color: ${({ theme }) => theme.components.background.primary};
   color: ${({ theme }) => theme.components.text.primary};
-  transition: background-color 0.2s ease, color 0.2s ease;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
   min-height: 100vh;
 `;
 
@@ -28,16 +25,7 @@ export const AppRouter = () => {
       path: "/",
       element: <Layout />,
       errorElement: <Fallback />,
-      children: [
-        {
-          index: true,
-          element: <Navigate to="/demo" replace />,
-        },
-        {
-          path: "demo",
-          element: <DemoPage />,
-        },
-      ],
+      children: routeChildren,
     },
   ]);
 

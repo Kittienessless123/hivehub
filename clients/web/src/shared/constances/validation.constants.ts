@@ -18,3 +18,14 @@ export const VALIDATION = {
     MAX: 1000000,
   },
 } as const
+
+export const VALIDATION_RULES = {
+  email: {
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    message: 'Введите корректный email адрес'
+  },
+  password: {
+    pattern: /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$/,
+    message: 'Пароль должен содержать минимум 8 символов, одну букву и одну цифру'
+  }
+} as const;

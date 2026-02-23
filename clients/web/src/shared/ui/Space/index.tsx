@@ -19,6 +19,6 @@ export const Empty = ({ height }: SpaceProps) => css`
   `}
 `;
 
-export const SpaceArea = styled.div<SpaceProps>`
+export const Space = styled.div<SpaceProps>`
   ${Empty}
 `;

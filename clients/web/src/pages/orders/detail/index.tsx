@@ -1,0 +1,5 @@
+export const OrderDetailPage = () => {
+  return(
+    <></>
+  )
+}

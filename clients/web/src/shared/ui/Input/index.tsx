@@ -1,204 +1,327 @@
-import { type InputHTMLAttributes, useState, useRef, useEffect } from "react";
-import { Button } from "shared/ui/Button/IconButton";
-import { CloseIcon } from "shared/assets/CloseIcon";
-import { EditIcon } from "shared/assets/EditIcon";
-import { CheckIcon } from "shared/assets/CheckIcon";
+import { type InputHTMLAttributes, useState, useRef, forwardRef } from "react";
+import { EyeClose } from "shared/assets/EyeClose";
+import { EyeIcon } from "shared/assets/EyeIcon";
+import { VALIDATION_RULES } from "shared/constances/validation.constants";
+import type { ValidationRules } from "shared/types/validation.types";
 import styled, { css } from "styled-components";
-import { ScreenReaderText } from "./ScreenReaderText.tsx";
 
-interface TextFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+
+interface InputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'size'> {
   label: string;
-  onSave?: (value: string) => Promise<void>;
   id: string;
+  icon?: React.ReactNode;
+  iconPosition?: 'left' | 'right';
+  validation?: ValidationRules;
+  error?: string;
+  success?: boolean;
+  helperText?: string;
+  size?: 'small' | 'medium' | 'large';
+  fullWidth?: boolean;
+  onValidate?: (isValid: boolean) => void;
 }
 
-// Стилизованные компоненты
-const TextfieldWrapper = styled.div`
+const InputWrapper = styled.div<{ $fullWidth?: boolean }>`
+  display: flex;
+  flex-direction: column;
+  width: ${({ $fullWidth }) => $fullWidth ? '100%' : 'fit-content'};
+  gap: ${({ theme }) => theme.spacing.xs};
+`;
+
+const InputContainer = styled.div<{ 
+  $size: string; 
+  $hasError?: boolean;
+  $hasSuccess?: boolean;
+  $disabled?: boolean;
+}>`
   display: flex;
   align-items: center;
-  gap: ${({ theme }) => theme.spacing.s};
-  border-radius: ${({ theme }) => theme.borderRadius.l};
-  padding: ${({ theme }) => theme.spacing.xs} ${({ theme }) => theme.spacing.m};
+  gap: ${({ theme }) => theme.spacing.xs};
+  border-radius: ${({ theme }) => theme.borderRadius.m};
   background: ${({ theme }) => theme.components.background.primary};
-  color: ${({ theme }) => theme.components.text.primary};
-  border: 1px solid ${({ theme }) => theme.components.border.default};
+  border: 1px solid ${({ theme, $hasError, $hasSuccess }) => 
+    $hasError ? theme.components.border.error :
+    $hasSuccess ? theme.colors.success :
+    theme.components.border.default
+  };
   transition: all 0.2s ease;
+  opacity: ${({ $disabled }) => $disabled ? 0.6 : 1};
+  
+  ${({ $size, theme }) => {
+    switch ($size) {
+      case 'small':
+        return css`
+          padding: ${theme.spacing.xs} ${theme.spacing.s};
+          min-height: 32px;
+        `;
+      case 'large':
+        return css`
+          padding: ${theme.spacing.m} ${theme.spacing.l};
+          min-height: 48px;
+        `;
+      default: 
+        return css`
+          padding: ${theme.spacing.s} ${theme.spacing.m};
+          min-height: 40px;
+        `;
+    }
+  }}
   
   &:focus-within {
-    border-color: ${({ theme }) => theme.components.border.focus};
-    box-shadow: 0 0 0 2px ${({ theme }) => theme.colors.primary}20;
+    border-color: ${({ theme, $hasError }) => 
+      $hasError ? theme.components.border.error : theme.components.border.focus
+    };
+    box-shadow: 0 0 0 2px ${({ theme, $hasError }) => 
+      $hasError ? theme.colors.danger + '20' : theme.colors.primary + '20'
+    };
+  }
+  
+  &:hover:not(:focus-within) {
+    border-color: ${({ theme, $hasError, $disabled }) => 
+      !$disabled && ($hasError ? theme.components.border.error : theme.components.border.light)
+    };
   }
 `;
 
-const TextfieldHeader = styled.div`
+const IconWrapper = styled.span<{ $clickable?: boolean }>`
   display: flex;
-  flex-wrap: nowrap;
-  width: max-content;
   align-items: center;
-  align-content: center;
-  justify-content: space-between;
-  margin-right: ${({ theme }) => theme.spacing.xl};
-  background-color: transparent;
-`;
-
-const Label = styled.label`
-  font-size: 14px;
-  font-weight: 500;
+  justify-content: center;
   color: ${({ theme }) => theme.components.text.secondary};
-  cursor: pointer;
-  user-select: none;
+  font-size: 1.2em;
+  cursor: ${({ $clickable }) => $clickable ? 'pointer' : 'default'};
+  
+  svg {
+    width: 1.2em;
+    height: 1.2em;
+  }
   
   &:hover {
-    color: ${({ theme }) => theme.components.text.primary};
+    color: ${({ $clickable, theme }) => $clickable ? theme.components.text.primary : 'inherit'};
   }
 `;
 
-const Input = styled.input<{ $editMode: boolean }>`
-  padding: ${({ theme }) => theme.spacing.xs};
-  border-radius: ${({ theme }) => theme.borderRadius.m};
-  font-size: 16px;
-  margin: ${({ theme }) => theme.spacing.xs};
-  border: none;
+const StyledInput = styled.input`
   width: 100%;
+  border: none;
   background: transparent;
   color: ${({ theme }) => theme.components.text.primary};
-  
-  &:focus {
-    outline: none;
-  }
-  
-  ${({ $editMode, theme }) => !$editMode && css`
-    cursor: default;
-    opacity: 0.8;
-    background-color: ${theme.components.background.secondary};
-    border-radius: ${theme.borderRadius.m};
-  `}
+  font-size: inherit;
+  line-height: 1.5;
+  outline: none;
   
   &::placeholder {
     color: ${({ theme }) => theme.components.text.disabled};
     opacity: 0.7;
   }
-`;
-
-const ActionsContainer = styled.div`
-  display: flex;
-  align-items: center;
-  gap: ${({ theme }) => theme.spacing.xs};
-  margin-right: ${({ theme }) => theme.spacing.m};
-`;
-
-// Стилизованная кнопка с тултипом
-const StyledActionButton = styled(Button)`
-  position: relative;
   
-  &:focus::after {
-    content: attr(aria-label);
-    position: absolute;
-    bottom: -30px;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: ${({ theme }) => theme.components.background.tertiary};
-    color: ${({ theme }) => theme.components.text.primary};
-    padding: ${({ theme }) => `${theme.spacing.xs} ${theme.spacing.s}`};
-    border-radius: ${({ theme }) => theme.borderRadius.s};
-    font-size: 12px;
-    white-space: nowrap;
-    border: 1px solid ${({ theme }) => theme.components.border.default};
-    box-shadow: ${({ theme }) => theme.shadows.s};
-    z-index: 1000;
-    pointer-events: none;
+  &:disabled {
+    cursor: not-allowed;
   }
 `;
 
-export function TextField({ id, onSave, label, ...props }: TextFieldProps) {
-  const [editMode, setEditMode] = useState(false);
+const Label = styled.label<{ $required?: boolean }>`
+  font-size: 14px;
+  font-weight: 500;
+  color: ${({ theme }) => theme.components.text.secondary};
+  margin-left: ${({ theme }) => theme.spacing.xs};
+  
+  ${({ $required, theme }) => $required && css`
+    &::after {
+      content: ' *';
+      color: ${theme.colors.danger};
+      font-weight: bold;
+    }
+  `}
+`;
+
+const HelperText = styled.span<{ $error?: boolean; $success?: boolean }>`
+  font-size: 12px;
+  margin-left: ${({ theme }) => theme.spacing.xs};
+  color: ${({ theme, $error, $success }) => 
+    $error ? theme.colors.danger :
+    $success ? theme.colors.success :
+    theme.components.text.secondary
+  };
+`;
+
+export const Input = forwardRef<HTMLInputElement, InputProps>(({
+  label,
+  id,
+  icon,
+  iconPosition = 'left',
+  validation,
+  error: externalError,
+  success = false,
+  helperText,
+  size = 'medium',
+  fullWidth = false,
+  disabled = false,
+  required = false,
+  type = 'text',
+  value,
+  defaultValue,
+  onChange,
+  onBlur,
+  onValidate,
+  className,
+  placeholder,
+  ...props
+}, ref) => {
+  const [internalValue, setInternalValue] = useState(value || defaultValue || '');
+  const [internalError, setInternalError] = useState<string | null>(null);
+  const [touched, setTouched] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const editBtnRef = useRef<HTMLButtonElement>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const closeEditMode = () => {
-    setEditMode(false);
-    editBtnRef.current?.focus();
+  const combinedRef = (node: HTMLInputElement) => {
+    inputRef.current = node;
+    if (typeof ref === 'function') {
+      ref(node);
+    } else if (ref) {
+      ref.current = node;
+    }
   };
 
-  const openEditMode = () => {
-    setEditMode(true);
-  };
-
-  const onEditHandler = async () => {
-    const currentValue = inputRef.current?.value || "";
+  const validateInput = (val: string): string | null => {
+    if (!validation) return null;
     
-    try {
-      await onSave?.(currentValue);
-      closeEditMode();
-    } catch (error) {
-      console.error("Failed to save:", error);
-      // Здесь можно добавить уведомление об ошибке
+    // Required validation
+    if (validation.required && (!val || val.trim() === '')) {
+      return validation.required.message;
+    }
+    
+    // Skip other validations if value is empty and not required
+    if (!val || val.trim() === '') return null;
+    
+    // Email validation
+    if (validation.email && type === 'email') {
+      const rule = validation.email.pattern || VALIDATION_RULES.email.pattern;
+      if (!rule.test(val)) {
+        return validation.email.message || VALIDATION_RULES.email.message;
+      }
+    }
+    
+    // Password validation
+    if (validation.password && type === 'password') {
+      const rule = validation.password.pattern || VALIDATION_RULES.password.pattern;
+      if (!rule.test(val)) {
+        return validation.password.message || VALIDATION_RULES.password.message;
+      }
+    }
+    
+    // Min length validation
+    if (validation.minLength && val.length < validation.minLength.min) {
+      return validation.minLength.message;
+    }
+    
+    // Max length validation
+    if (validation.maxLength && val.length > validation.maxLength.max) {
+      return validation.maxLength.message;
+    }
+    
+    // Custom validation
+    if (validation.custom?.validate) {
+      if (!validation.custom.validate(val)) {
+        return validation.custom.message;
+      }
+    }
+    
+    return null;
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInternalValue(newValue);
+    onChange?.(e);
+    
+    if (touched) {
+      const errorMsg = validateInput(newValue);
+      setInternalError(errorMsg);
+      onValidate?.(!errorMsg);
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && editMode) {
-      onEditHandler();
-    } else if (e.key === "Escape" && editMode) {
-      closeEditMode();
-    }
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    setTouched(true);
+    const errorMsg = validateInput(internalValue as string);
+    setInternalError(errorMsg);
+    onValidate?.(!errorMsg);
+    onBlur?.(e);
   };
 
-  useEffect(() => {
-    if (!editMode) return;
-    inputRef.current?.focus();
-  }, [editMode]);
+  const inputType = type === 'password' && showPassword ? 'text' : type;
 
-  const labelId = `label-${id}`;
-  const cancelScreenReaderId = `cancel-screen-reader-text-${id}`;
-  const editScreenReaderId = `edit-screen-reader-text-${id}`;
+  const passwordIcon = type === 'password' && (
+    <IconWrapper 
+      $clickable 
+      onClick={() => setShowPassword(!showPassword)}
+      aria-label={showPassword ? 'Скрыть пароль' : 'Показать пароль'}
+    >
+      {showPassword ? <EyeIcon></EyeIcon> : <EyeClose></EyeClose>}
+    </IconWrapper>
+  );
+
+  const displayError = externalError || internalError;
+  const displaySuccess = success && !displayError;
 
   return (
-    <TextfieldWrapper>
-      <TextfieldHeader>
-        <Label id={labelId} htmlFor={id}>
-          {label}
-        </Label>
-      </TextfieldHeader>
+    <InputWrapper $fullWidth={fullWidth} className={className}>
+      <Label htmlFor={id} $required={required}>
+        {label}
+      </Label>
       
-      <Input
-        id={id}
-        {...props}
-        $editMode={editMode}
-        readOnly={!editMode}
-        ref={inputRef}
-        aria-labelledby={labelId}
-        onKeyDown={handleKeyDown}
-      />
-
-      {editMode && (
-        <ActionsContainer>
-          <ScreenReaderText id={cancelScreenReaderId}>
-            Cancel editing
-          </ScreenReaderText>
-
-          <StyledActionButton
-            icon={<CloseIcon />}
-            onClick={closeEditMode}
-            aria-label="Cancel"
-            text=""
-            type="button"
-          />
-        </ActionsContainer>
+      <InputContainer 
+        $size={size}
+        $hasError={!!displayError}
+        $hasSuccess={displaySuccess}
+        $disabled={disabled}
+      >
+        {icon && iconPosition === 'left' && (
+          <IconWrapper aria-hidden="true">
+            {icon}
+          </IconWrapper>
+        )}
+        
+        <StyledInput
+          id={id}
+          ref={combinedRef}
+          type={inputType}
+          value={value !== undefined ? value : internalValue}
+          onChange={handleChange}
+          onBlur={handleBlur}
+          disabled={disabled}
+          required={required}
+          placeholder={placeholder}
+          aria-invalid={!!displayError}
+          aria-describedby={
+            displayError ? `${id}-error` :
+            helperText ? `${id}-helper` :
+            undefined
+          }
+          {...props}
+        />
+        
+        {icon && iconPosition === 'right' && (
+          <IconWrapper aria-hidden="true">
+            {icon}
+          </IconWrapper>
+        )}
+        
+        {type === 'password' && passwordIcon}
+      </InputContainer>
+      
+      {(displayError || helperText) && (
+        <HelperText 
+          id={displayError ? `${id}-error` : `${id}-helper`}
+          $error={!!displayError}
+          $success={displaySuccess}
+          role={displayError ? 'alert' : undefined}
+        >
+          {displayError || helperText}
+        </HelperText>
       )}
-      
-      <StyledActionButton
-        text={editMode ? "Save" : "Edit"}
-        icon={editMode ? <CheckIcon /> : <EditIcon />}
-        onClick={editMode ? onEditHandler : openEditMode}
-        ref={editBtnRef}
-        aria-label={editMode ? "Save changes" : "Edit"}
-        type="button"
-      />
-      
-      <ScreenReaderText id={editScreenReaderId}>
-        {editMode ? "Save changes" : "Edit"}
-      </ScreenReaderText>
-    </TextfieldWrapper>
+    </InputWrapper>
   );
-}
+});
+
+Input.displayName = 'Input';

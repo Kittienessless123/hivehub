@@ -1,4 +1,4 @@
-import React from "react";
+import React, {forwardRef } from "react";
 import styled, { css, type DefaultTheme } from "styled-components";
 import { borderRadius } from "shared/lib/styled/borderRadius";
 import { centerContent } from "shared/lib/styled/centerContent";
@@ -14,6 +14,10 @@ type ButtonProps = {
   href?: string;
   disabled?: boolean;
   loading?: boolean;
+  children?: React.ReactNode;
+  className?: string;
+  type?: "button" | "submit" | "reset";
+  "aria-label"?: string;
 };
 
 type ButtonStyleProps = {
@@ -44,10 +48,10 @@ const getTextColor = (props: ThemedProps): string => {
   if (disabled) return theme.components.text.disabled;
   
   switch ($type) {
-    case "primary": return theme.components.text.primary;
-    case "secondary": return theme.components.text.secondary;
+    case "primary": return theme.components.text.inverse;
+    case "secondary": return theme.components.text.primary;
     case "ghost": return theme.components.text.link;
-    default: return theme.components.text.primary;
+    default: return theme.components.text.inverse;
   }
 };
 
@@ -62,7 +66,8 @@ const buttonBaseStyles = css<ButtonStyleProps>`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
+  font-size: 14px;
+  font-weight: 500;
   svg {
     width: 20px;
     height: 20px;
@@ -75,25 +80,33 @@ const buttonBaseStyles = css<ButtonStyleProps>`
         filter: brightness(0.95);
       `}
   }
+
+  &:focus-visible {
+    outline: 2px solid ${({ theme }) => theme.colors.primary};
+    outline-offset: 2px;
+  }
 `;
 
 // Стили для обычной кнопки (с текстом)
 const RegularButton = styled.button<ButtonStyleProps>`
   ${buttonBaseStyles}
-  padding: ${({ theme }) => theme.spacing.m}px;
+  padding: ${({ theme }) => theme.spacing.s} ${({ theme }) => theme.spacing.m};
   gap: 8px;
+  ${borderRadius.m};
+
   white-space: nowrap;
   overflow: hidden;
+
 `;
 
 // Стили для иконочной кнопки (без текста)
-const IconButton = styled.button<ButtonStyleProps>`
+const StyledIconButton = styled.button<ButtonStyleProps>`
   ${buttonBaseStyles}
   ${centerContent}
-  ${borderRadius.round}
   width: 40px;
   height: 40px;
   padding: 0;
+  ${borderRadius.round};
 `;
 
 // Компонент содержимого кнопки для переиспользования
@@ -106,22 +119,29 @@ const ButtonContent: React.FC<{ loading?: boolean; icon?: React.ReactNode; text?
     </>
   );
 
-export const Button = (props: ButtonProps) => {
+// Используем forwardRef для проброса ref
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) => {
   const { 
     $type, 
     icon, 
-    onClick, 
-    text, 
+    onClick,
+    text,
+    children,
     href, 
     disabled = false, 
-    loading = false, 
+    loading = false,
+    className,
+    type = "button",
+    "aria-label": ariaLabel,
     ...rest 
   } = props;
 
-  const isIconOnly = !text && !!icon;
+  const isIconOnly = !text && !!icon && !children;
   const commonProps = {
     disabled: disabled || loading,
     $type,
+    className,
+    "aria-label": ariaLabel || (typeof text === 'string' ? text : undefined),
     ...rest
   };
 
@@ -132,18 +152,38 @@ export const Button = (props: ButtonProps) => {
     return (
       <a href={href} style={{ textDecoration: 'none' }}>
         <RegularButton as="span" {...commonProps}>
-          {buttonContent}
+          {buttonContent}{children}
         </RegularButton>
       </a>
     );
   }
 
   // Выбираем соответствующий компонент в зависимости от наличия текста
-  const ButtonComponent = isIconOnly ? IconButton : RegularButton;
+  if (isIconOnly) {
+    return (
+      <StyledIconButton
+        ref={ref}
+        type={type}
+        onClick={onClick}
+        {...commonProps}
+      >
+        {buttonContent}
+        {children}
+      </StyledIconButton>
+    );
+  }
 
   return (
-    <ButtonComponent onClick={onClick} {...commonProps}>
+    <RegularButton
+      ref={ref}
+      type={type}
+      onClick={onClick}
+      {...commonProps}
+    >
       {buttonContent}
-    </ButtonComponent>
+      {children}
+    </RegularButton>
   );
-};
+});
+
+Button.displayName = "Button";

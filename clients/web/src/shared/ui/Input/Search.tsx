@@ -1,7 +1,7 @@
-/* import React, {useState } from "react";
-import { useTranslation } from "react-i18next";
+import {type ChangeEventHandler } from "react";
+//import { useTranslation } from "react-i18next";
 import { SearchIcon } from "shared/assets/SearchIcon";
-import { IconButton } from "shared/ui/button/IconButton";
+import { Button } from "shared/ui/Button";
 import styled from "styled-components";
 
 const SearchBlock = styled.div`
@@ -19,7 +19,7 @@ const SearchInput = styled.input`
   padding: 5px;
   width: 100%;
   border-color: transparent;
-  color: ${({ theme }) => theme.colors.font};
+  color: ${({ theme }) => theme.components.text.primary};
 `;
 export type SearchProps = {
   searchHandler: ChangeEventHandler;
@@ -27,8 +27,7 @@ export type SearchProps = {
 
 export const Search = (props: SearchProps) => {
   const { searchHandler } = props;
-  const { t } = useTranslation();
-  const [value, setValue] = useState(t("LanguageList.text3"));
+  //const { t } = useTranslation();
 
    
  
@@ -37,13 +36,13 @@ export const Search = (props: SearchProps) => {
       <SearchInput
         type="search"
         name="search"
-        placeholder={t("LanguageList.text3")}
+        placeholder={'Search'}
         onChange={(event) => searchHandler(event)}
          
       />
-      <IconButton title={"search"} icon={<SearchIcon />}></IconButton>
+      <Button text={"search"} icon={<SearchIcon />}></Button>
     </SearchBlock>
   );
 };
 
-export default Search; */
+export default Search; 

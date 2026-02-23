@@ -1,5 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
+import {
+  useFloating,
+  autoUpdate,
+  offset,
+  flip,
+  shift,
+  size,
+  FloatingFocusManager,
+  useClick,
+  useDismiss,
+  useRole,
+  useInteractions,
+} from "@floating-ui/react";
 import { type Option } from "../../types/Option.ts";
 import { ArrowDownIcon } from "shared/assets/ArrowDownIcon.tsx";
 import { transition } from "shared/lib/styled/transition";
@@ -17,11 +30,6 @@ interface SelectProps {
 interface SelectButtonProps {
   $isOpen: boolean;
 }
-
-const SelectWrapper = styled.div`
-  position: relative;
-  width: fit-content;
-`;
 
 const SelectButton = styled.div<SelectButtonProps>`
   ${rowBetween}
@@ -72,10 +80,7 @@ const Placeholder = styled.span<{ $isSelected: boolean }>`
 `;
 
 const OptionsList = styled.div`
-  position: absolute;
-  width: 100%;
   z-index: 1000;
-  margin-top: 4px;
   ${shadows.medium}
   ${borderRadius.m}
   overflow: hidden;
@@ -126,47 +131,47 @@ export const Select: React.FC<SelectProps> = ({
   onChange,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const wrapperRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        wrapperRef.current &&
-        !wrapperRef.current.contains(event.target as Node)
-      ) {
-        setIsOpen(false);
-      }
-    };
+  const { refs, floatingStyles, context } = useFloating({
+    open: isOpen,
+    onOpenChange: setIsOpen,
+    placement: "bottom-start",
+    middleware: [
+      offset(4),
+      flip(),
+      shift(),
+      size({
+        apply({ rects, elements }) {
+          Object.assign(elements.floating.style, {
+            width: `${rects.reference.width}px`,
+          });
+        },
+      }),
+    ],
+    whileElementsMounted: autoUpdate,
+  });
 
-    const handleEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setIsOpen(false);
-      }
-    };
+  const click = useClick(context);
+  const dismiss = useDismiss(context);
+  const role = useRole(context);
 
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, []);
+  const { getReferenceProps, getFloatingProps } = useInteractions([
+    click,
+    dismiss,
+    role,
+  ]);
 
   const handleSelect = (option: Option) => {
     onChange(option);
     setIsOpen(false);
   };
 
-  const handleToggle = () => {
-    setIsOpen(!isOpen);
-  };
-
   return (
-    <SelectWrapper ref={wrapperRef}>
+    <>
       <SelectButton
+        ref={refs.setReference}
         $isOpen={isOpen}
-        onClick={handleToggle}
+        {...getReferenceProps()}
         role="combobox"
         aria-expanded={isOpen}
         aria-haspopup="listbox"
@@ -178,19 +183,27 @@ export const Select: React.FC<SelectProps> = ({
       </SelectButton>
 
       {isOpen && (
-        <OptionsList role="listbox">
-          {options.map((option) => (
-            <OptionItem
-              key={option.value}
-              onClick={() => handleSelect(option)}
-              role="option"
-              aria-selected={selected?.value === option.value}
-            >
-              {option.label}
-            </OptionItem>
-          ))}
-        </OptionsList>
+        <FloatingFocusManager context={context} modal={false}>
+          <OptionsList
+            // eslint-disable-next-line react-hooks/refs
+            ref={refs.setFloating}
+            style={floatingStyles}
+            {...getFloatingProps()}
+            role="listbox"
+          >
+            {options.map((option) => (
+              <OptionItem
+                key={option.value}
+                onClick={() => handleSelect(option)}
+                role="option"
+                aria-selected={selected?.value === option.value}
+              >
+                {option.label}
+              </OptionItem>
+            ))}
+          </OptionsList>
+        </FloatingFocusManager>
       )}
-    </SelectWrapper>
+    </>
   );
 };

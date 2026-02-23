@@ -35,8 +35,8 @@ export interface IComponentColors {
     secondary: string;
     tertiary: string;
     overlay: string;
-    blur: string;        // добавлено
-    inverted: string;    // добавлено
+    blur: string;        
+    inverted: string;    
   };
   
   text: {
@@ -53,8 +53,8 @@ export interface IComponentColors {
     light: string;
     focus: string;       
     error: string;
-    ghost: string;        // добавлено
-    dashed: string;       // добавлено
+    ghost: string;        
+    dashed: string;       
   };
   
   state: {
@@ -73,6 +73,14 @@ export interface ISpacing {
   xl: string;  // 32px
   xxl: string; // 48px
 }
+export interface IGradients {
+  primary: string;
+  secondary: string;
+  success: string;
+  danger: string;
+  warning: string;
+  info: string;
+}
 
 export interface IBorderRadius {
   xs: string;  // 2px
@@ -83,6 +91,7 @@ export interface IBorderRadius {
   round: string; 
 }
 
+
 export interface IShadows {
   none: string;
   xs: string;
@@ -90,14 +99,52 @@ export interface IShadows {
   m: string;
   l: string;
   xl: string;
+  xxl: string;
+  
+  soft: {
+    xs: string;
+    s: string;
+    m: string;
+    l: string;
+    xl: string;
+  };
+  
+  hard: {
+    xs: string;
+    s: string;
+    m: string;
+    l: string;
+    xl: string;
+  };
+  
+  inset: {
+    s: string;
+    m: string;
+    l: string;
+  };
+  
+  glow: {
+    primary: string;
+    secondary: string;
+    success: string;
+    danger: string;
+    warning: string;
+    info: string;
+  };
+  
+  layer: {
+    1: string;
+    2: string;
+    3: string;
+  };
+  
+  custom: {
+    card: string;
+    dropdown: string;
+    modal: string;
+    tooltip: string;
+  };
 }
-
-export interface IGradients {
-  primary: string;
-  secondary: string;
-  success: string;
-}
-
 export enum ThemeEnum {
   light = "light",
   dark = "dark",

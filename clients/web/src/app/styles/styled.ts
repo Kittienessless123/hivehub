@@ -5,7 +5,7 @@ export interface IColorPalette {
   danger: string;
   warning: string;
   info: string;
-  
+  error: string;
   white: string;
   black: string;
   gray50: string;
@@ -130,6 +130,7 @@ export interface IShadows {
     danger: string;
     warning: string;
     info: string;
+    error: string;
   };
   
   layer: {

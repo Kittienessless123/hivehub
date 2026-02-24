@@ -9,6 +9,7 @@ export const lightTheme: ITheme = {
     secondary: "#9c27b0",
     success: "#2e7d32",
     danger: "#d32f2f",
+    error: "#d32f2f",
     warning: "#ed6c02",
     info: "#0288d1",
 
@@ -132,6 +133,7 @@ export const lightTheme: ITheme = {
       secondary: "0 4px 12px rgba(156, 39, 176, 0.3)",
       success: "0 4px 12px rgba(46, 125, 50, 0.3)",
       danger: "0 4px 12px rgba(211, 47, 47, 0.3)",
+      error: "0 4px 12px rgba(211, 47, 47, 0.3)",
       warning: "0 4px 12px rgba(237, 108, 2, 0.3)",
       info: "0 4px 12px rgba(2, 136, 209, 0.3)",
     },
@@ -164,6 +166,7 @@ export const darkTheme: ITheme = {
     danger: "#f48fb1",
     warning: "#ffb74d",
     info: "#80deea",
+    error: "#d32f2f",
 
     white: "#ffffff",
     black: "#000000",
@@ -285,6 +288,7 @@ export const darkTheme: ITheme = {
       secondary: "0 4px 12px rgba(206, 147, 216, 0.3)",
       success: "0 4px 12px rgba(129, 199, 132, 0.3)",
       danger: "0 4px 12px rgba(244, 143, 177, 0.3)",
+      error: "0 4px 12px rgba(244, 143, 177, 0.3)",
       warning: "0 4px 12px rgba(255, 183, 77, 0.3)",
       info: "0 4px 12px rgba(128, 222, 234, 0.3)",
     },

@@ -1,4 +1,5 @@
 export interface IColorPalette {
+
   primary: string;
   secondary: string;
   success: string;

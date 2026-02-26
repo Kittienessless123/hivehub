@@ -15,6 +15,7 @@ type ButtonProps = {
   disabled?: boolean;
   loading?: boolean;
   children? :React.ReactNode;
+  $isOpen? :boolean;
 };
 
 type ButtonPickedProps = Omit<
@@ -136,7 +137,7 @@ const ButtonComponents = styled.button<ButtonPickedProps & { $hasIcon?: boolean;
 `;
 
 export const Button = (props: ButtonProps) => {
-  const { $type, icon, onClick, text, href, disabled = false, loading = false, children, ...rest } = props;
+  const { $type, icon, onClick, text, href, disabled = false, loading = false,$isOpen=false, children, ...rest } = props;
 
   // Если есть href - рендерим ссылку
   if (href) {

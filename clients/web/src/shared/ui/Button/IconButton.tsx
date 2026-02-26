@@ -18,6 +18,7 @@ type ButtonProps = {
   className?: string;
   type?: "button" | "submit" | "reset";
   "aria-label"?: string;
+  $isOpen? :boolean;
 };
 
 type ButtonStyleProps = {
@@ -130,7 +131,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>((props, ref) =>
     href, 
     disabled = false, 
     loading = false,
-    className,
+    className, $isOpen=false, 
     type = "button",
     "aria-label": ariaLabel,
     ...rest 
